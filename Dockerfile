@@ -9,11 +9,11 @@ ENV JAVA_APP_DIR=/deployments \
 # according to http://www.2uo.de/myths-about-urandom/
 RUN rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7
 RUN set -ex && \
-    yum install -y \
-       java-1.8.0-openjdk  \
-       java-1.8.0-openjdk-devel \
-       curl && \
-    yum clean all && \
+    yum install -y --setopt=tsflags=nodocs \
+        java-1.${JAVA_MAJOR_VERSION}.0-openjdk  \
+        java-1.${JAVA_MAJOR_VERSION}.0-openjdk-devel \
+        curl && \
+    yum clean all && rm -rf /var/cache/yum \
     echo "securerandom.source=file:/dev/urandom" >> /usr/lib/jvm/java/jre/lib/security/java.security
 
 ENV JAVA_HOME /etc/alternatives/jre
