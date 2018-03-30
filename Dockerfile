@@ -3,7 +3,8 @@ FROM centos:7
 ENV JAVA_APP_DIR=/deployments \
     JAVA_MAJOR_VERSION=8 \
     SPARK_VERSION=2.3.0 \
-    HADOOP_VERSION=2.7
+    HADOOP_VERSION=2.7 \
+    PYSPARK_PYTHON=python3
 
 # /dev/urandom is used as random source, which is prefectly safe
 # according to http://www.2uo.de/myths-about-urandom/
@@ -40,7 +41,7 @@ RUN yum -y install epel-release && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y && rm -rf /var/cache/yum
 
-# Permanently python Software Collection
+# Permanently enable python Software Collection
 # vars taken from : source scl_source enable rh-python36
 ENV PATH=/opt/rh/rh-python36/root/usr/bin${PATH:+:${PATH}}
 ENV LD_LIBRARY_PATH=/opt/rh/rh-python36/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
