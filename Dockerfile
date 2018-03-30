@@ -33,7 +33,7 @@ WORKDIR /opt/spark/work-dir
 ENV SPARK_HOME /opt/spark
 
 RUN yum -y install epel-release && \
-    yum -y install python-pip && yum clean all && \
+    yum -y install python-pip && \
     yum install -y centos-release-scl-rh && \
     yum-config-manager --enable centos-sclo-rh-testing && \
     INSTALL_PKGS="rh-python36 rh-python36-python-pip" && \
