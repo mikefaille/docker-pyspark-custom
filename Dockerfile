@@ -20,9 +20,8 @@ ENV JAVA_HOME /etc/alternatives/jre
 
 ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini-amd64 /usr/bin
 
-RUN curl https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz > /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz
-
-RUN mkdir /opt/spark && \
+RUN curl https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz > /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
+    mkdir /opt/spark && \
     tar xvfp /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz -C /opt/spark --strip-components=1 && \
     rm /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
     mkdir /opt/spark/work-dir
