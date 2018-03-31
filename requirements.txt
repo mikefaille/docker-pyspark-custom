@@ -1,0 +1,7 @@
+pandas==0.22.*
+numpy==1.14.*
+scipy==1.0.*
+spark-sklearn==0.2.*
+py4j==0.10.*
+mlboost==0.4.*
+-e hg+https://bitbucket.org/michael_faille/flayers@python3#egg=flayers

@@ -39,6 +39,8 @@ RUN yum -y install epel-release && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y && rm -rf /var/cache/yum
 
+COPY requirements.txt /opt/spark/
+
 # Permanently enable python Software Collection
 # vars taken from : source scl_source enable rh-python36
 ENV PATH=/opt/rh/rh-python36/root/usr/bin${PATH:+:${PATH}}
@@ -47,4 +49,10 @@ ENV MANPATH=/opt/rh/rh-python36/root/usr/share/man:$MANPATH
 ENV PKG_CONFIG_PATH=/opt/rh/rh-python36/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
 ENV XDG_DATA_DIRS="/opt/rh/rh-python36/root/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
-RUN pip3 install pandas==0.22.* numpy==1.14.* scipy==1.0.* spark-sklearn==0.2.* py4j==0.10.*
+# Configure pyspark
+ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+
+# requirements for pytrade and flayers
+RUN yum install -y --setopt=tsflags=nodocs blas atlas gcc-gfortran swig gcc-c++ mercurial
+
+RUN pip install -r /opt/spark/requirements.txt
