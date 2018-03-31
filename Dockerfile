@@ -5,6 +5,9 @@ ENV JAVA_MAJOR_VERSION=8 \
     HADOOP_VERSION=2.7 \
     PYSPARK_PYTHON=python3
 
+ENV LC_ALL=en_CA.utf8 \
+    LANG=en_CA.utf8
+
 # /dev/urandom is used as random source, which is prefectly safe
 # according to http://www.2uo.de/myths-about-urandom/
 RUN rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7
@@ -18,7 +21,8 @@ RUN set -ex && \
 
 ENV JAVA_HOME /etc/alternatives/jre
 
-ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini-amd64 /usr/bin
+ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini-amd64 /usr/bin/tini
+RUN chmod +x /usr/bin/tini
 
 RUN curl https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz > /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
     mkdir /opt/spark && \
@@ -39,8 +43,6 @@ RUN yum -y install epel-release && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y && rm -rf /var/cache/yum
 
-COPY requirements.txt /opt/spark/
-
 # Permanently enable python Software Collection
 # vars taken from : source scl_source enable rh-python36
 ENV PATH=/opt/rh/rh-python36/root/usr/bin${PATH:+:${PATH}}
@@ -51,8 +53,21 @@ ENV XDG_DATA_DIRS="/opt/rh/rh-python36/root/usr/share:${XDG_DATA_DIRS:-/usr/loca
 
 # Configure pyspark
 ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+# Set jupyter path
+ENV JUPYTER_DATA_DIR=/usr/local/share/jupyter
 
 # requirements for pytrade and flayers
-RUN yum install -y --setopt=tsflags=nodocs blas atlas gcc-gfortran swig gcc-c++ mercurial
+RUN yum install -y --setopt=tsflags=nodocs blas atlas gcc-gfortran swig gcc-c++ mercurial && \
+    yum clean all && rm -rf /var/cache/yum
 
-RUN pip install -r /opt/spark/requirements.txt
+COPY requirements.txt /opt/spark/
+
+# RUN # pip install --no-cache-dir pipenv && \
+RUN  pip install --no-cache-dir -r /opt/spark/requirements.txt && \
+    jupyter toree install --spark_home=${SPARK_HOME}
+
+EXPOSE 8888
+
+# https://jupyter-notebook.readthedocs.io/en/latest/public_server.html#docker-cmd
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0"]

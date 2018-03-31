@@ -4,4 +4,18 @@ scipy==1.0.*
 spark-sklearn==0.2.*
 py4j==0.10.*
 mlboost==0.4.*
+
+#Toree : Jupyter integration with spark
+https://dist.apache.org/repos/dist/dev/incubator/toree/0.2.0-incubating-rc4/toree-pip/toree-0.2.0.tar.gz
+#Jupyter 4.* is required by toree 0.1.*
+notebook==4.4.*
+jupyter-client==4.4.*
+
+# interactive graph for jupiter
+plotly==2.5.*
+matplotlib==2.2.*
+
 -e hg+https://bitbucket.org/michael_faille/flayers@python3#egg=flayers
+
+# Requirement for our current jupyter
+tornado==4.*
