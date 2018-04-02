@@ -67,6 +67,10 @@ COPY requirements.txt /opt/spark/
 RUN  pip install --no-cache-dir -r /opt/spark/requirements.txt && \
      jupyter toree install --spark_home=${SPARK_HOME} --interpreters=Scala,PySpark,SQL
 
+# As suggested for BigDL tutorials
+# https://github.com/intel-analytics/BigDL/blob/master/docker/BigDL/Dockerfile
+RUN python3 -m ipykernel install
+
 EXPOSE 8888
 
 # https://jupyter-notebook.readthedocs.io/en/latest/public_server.html#docker-cmd
