@@ -27,7 +27,8 @@ matplotlib==2.2.*
 -e hg+https://bitbucket.org/michael_faille/flayers@python3#egg=flayers
 
 # Requirement for our current jupyter
-tornado==4.*
+tornado==4.5.*
+
 # As suggested for BigDL tutorials
 # https://github.com/intel-analytics/BigDL/blob/master/docker/BigDL/Dockerfile
 seaborn==0.8.*
