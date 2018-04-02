@@ -64,7 +64,7 @@ COPY requirements.txt /opt/spark/
 
 # RUN # pip install --no-cache-dir pipenv && \
 RUN  pip install --no-cache-dir -r /opt/spark/requirements.txt && \
-    jupyter toree install --spark_home=${SPARK_HOME}
+     jupyter toree install --spark_home=${SPARK_HOME} --interpreters=Scala,PySpark,SQL
 
 EXPOSE 8888
 
