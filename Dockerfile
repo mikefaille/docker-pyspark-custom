@@ -3,7 +3,8 @@ FROM centos:7
 ENV JAVA_MAJOR_VERSION=8 \
     SPARK_VERSION=2.3.0 \
     HADOOP_VERSION=2.7 \
-    PYSPARK_PYTHON=python3
+    PYTHON_VERSION=36 \
+    PYSPARK_PYTHON=python${PYTHON_VERSION}
 
 ENV LC_ALL=en_CA.utf8 \
     LANG=en_CA.utf8
@@ -38,18 +39,18 @@ RUN yum -y install epel-release && \
     yum -y install python-pip && \
     yum install -y centos-release-scl-rh && \
     yum-config-manager --enable centos-sclo-rh-testing && \
-    INSTALL_PKGS="rh-python36 rh-python36-python-pip" && \
+    INSTALL_PKGS="rh-python${PYTHON_VERSION} rh-python${PYTHON_VERSION}-python-pip" && \
     yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y && rm -rf /var/cache/yum
 
 # Permanently enable python Software Collection
 # vars taken from : source scl_source enable rh-python36
-ENV PATH=/opt/rh/rh-python36/root/usr/bin${PATH:+:${PATH}}
-ENV LD_LIBRARY_PATH=/opt/rh/rh-python36/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-ENV MANPATH=/opt/rh/rh-python36/root/usr/share/man:$MANPATH
-ENV PKG_CONFIG_PATH=/opt/rh/rh-python36/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
-ENV XDG_DATA_DIRS="/opt/rh/rh-python36/root/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+ENV PATH=$SPARK_HOME:/opt/rh/rh-python${PYTHON_VERSION}/root/usr/bin${PATH:+:${PATH}}
+ENV LD_LIBRARY_PATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+ENV MANPATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/share/man:$MANPATH
+ENV PKG_CONFIG_PATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
+ENV XDG_DATA_DIRS="/opt/rh/rh-python${PYTHON_VERSION}/root/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
 # Configure pyspark
 ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
