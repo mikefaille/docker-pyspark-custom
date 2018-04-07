@@ -7,6 +7,7 @@ This docker projet boostrap standalone and featurefull spark environment to deve
 
 ### To test hadoop:
 
+0. Get dataset first : `./prepare.sh`
 
 ```
 # Start shell on docker image :
