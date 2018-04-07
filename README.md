@@ -5,7 +5,7 @@ This docker projet boostrap standalone and featurefull spark environment to deve
 ## Quickstart
 
 ```
- CONTAINER_ID=$(docker run -d -ti -p 8888:8888 mikefaille/pyspark-custom)
+ CONTAINER_ID=$(docker run -d -ti -p 8888:8888 agileops/fastds-tutorial)
  docker logs $CONTAINER_ID -f
 
 
