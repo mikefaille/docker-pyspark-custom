@@ -4,12 +4,24 @@ This docker projet boostrap standalone and featurefull spark environment to deve
 
 ## Quickstart
 
+
+### To test hadoop:
+
+
 ```
- CONTAINER_ID=$(docker run -d -ti -p 8888:8888 agileops/fastds-tutorial)
+# Start shell on docker image :
+docker run -ti agileops/fastds-tutorial bash
+
+# Start map/reduce job
+ hadoop jar $HADOOP_HOME/hadoop-streaming.jar -input data -output out -mapper /bin/cat -reducer /bin/wc
+```
+
+
+### To run jupyter:
+
+```
+ CONTAINER_ID=$(docker run -d -ti -v data/data -p 8888:8888 agileops/fastds-tutorial)
  docker logs $CONTAINER_ID -f
-
-
-
 ```
 
 
