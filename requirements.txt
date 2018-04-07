@@ -16,7 +16,7 @@ torchvision==0.2.*
 
 #Toree : Jupyter integration with spark
 https://dist.apache.org/repos/dist/dev/incubator/toree/0.2.0-incubating-rc4/toree-pip/toree-0.2.0.tar.gz
-#Jupyter 4.* is required by toree 0.1.*
+#Jupyter 4.* is required by toree 0.2.*
 notebook==4.4.*
 jupyter-client==4.4.*
 

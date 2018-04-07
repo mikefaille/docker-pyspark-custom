@@ -1,0 +1,45 @@
+FROM centos:7
+
+ENV JAVA_MAJOR_VERSION=8
+    PYTHON_VERSION=36
+
+ENV LC_ALL=en_CA.utf8 \
+    LANG=en_CA.utf8
+
+# /dev/urandom is used as random source, which is prefectly safe
+# according to http://www.2uo.de/myths-about-urandom/
+RUN rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7
+RUN set -ex && \
+    yum install -y --setopt=tsflags=nodocs \
+        java-1.${JAVA_MAJOR_VERSION}.0-openjdk  \
+        java-1.${JAVA_MAJOR_VERSION}.0-openjdk-devel \
+        curl && \
+    yum clean all && rm -rf /var/cache/yum \
+    echo "securerandom.source=file:/dev/urandom" >> /usr/lib/jvm/java/jre/lib/security/java.security
+
+ENV JAVA_HOME /etc/alternatives/jre
+
+# https://github.com/docker-library/official-images#init
+ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini-amd64 /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+
+# Configure epel to get pip2 and python3.6 + pip3
+RUN yum -y install epel-release && \
+    yum -y install python-pip && \
+    yum install -y centos-release-scl-rh && \
+    yum-config-manager --enable centos-sclo-rh-testing && \
+    INSTALL_PKGS="rh-python${PYTHON_VERSION} rh-python${PYTHON_VERSION}-python-pip" && \
+    yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    yum clean all -y && rm -rf /var/cache/yum
+
+# Permanently enable python Software Collection
+# vars taken from : source scl_source enable rh-python36
+ENV PATH=$SPARK_HOME:/opt/rh/rh-python${PYTHON_VERSION}/root/usr/bin${PATH:+:${PATH}}
+ENV LD_LIBRARY_PATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+ENV MANPATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/share/man:$MANPATH
+ENV PKG_CONFIG_PATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
+ENV XDG_DATA_DIRS="/opt/rh/rh-python${PYTHON_VERSION}/root/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+
+# https://jupyter-notebook.readthedocs.io/en/latest/public_server.html#docker-cmd
+ENTRYPOINT ["/usr/bin/tini", "--"]

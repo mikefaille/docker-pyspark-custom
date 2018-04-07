@@ -1,56 +1,33 @@
-FROM centos:7
+FROM agileops/centos-javapython:latest
 
-ENV JAVA_MAJOR_VERSION=8 \
+ENV HADOOP_VERSION=2.7.5 \
+    HADOOP_HOME=/opt/hadoop \
     SPARK_VERSION=2.3.0 \
-    HADOOP_VERSION=2.7 \
+    SPARK_HOME=/opt/spark \
     PYTHON_VERSION=36 \
     PYSPARK_PYTHON=python${PYTHON_VERSION}
 
-ENV LC_ALL=en_CA.utf8 \
-    LANG=en_CA.utf8
+# Download and install hadoop+yarn+hdfs
+RUN yum install -y which && \
+    yum clean all && rm -rf /var/cache/yum && \
+    curl http://apache.mirror.iweb.ca/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz > /opt/hadoop-${HADOOP_VERSION}.tar.gz && \
+    mkdir ${HADOOP_HOME} && \
+    tar xvfp /opt/hadoop-${HADOOP_VERSION}.tar.gz -C ${HADOOP_HOME} --strip-components=1 && \
+    rm -fr /opt/hadoop/share/doc/ && \
+    rm /opt/hadoop-${HADOOP_VERSION}.tar.gz
 
-# /dev/urandom is used as random source, which is prefectly safe
-# according to http://www.2uo.de/myths-about-urandom/
-RUN rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7
-RUN set -ex && \
-    yum install -y --setopt=tsflags=nodocs \
-        java-1.${JAVA_MAJOR_VERSION}.0-openjdk  \
-        java-1.${JAVA_MAJOR_VERSION}.0-openjdk-devel \
-        curl && \
-    yum clean all && rm -rf /var/cache/yum \
-    echo "securerandom.source=file:/dev/urandom" >> /usr/lib/jvm/java/jre/lib/security/java.security
+ADD http://central.maven.org/maven2/org/apache/hadoop/hadoop-streaming/${HADOOP_VERSION}/hadoop-streaming-${HADOOP_VERSION}.jar ${HADOOP_HOME}/hadoop-streaming.jar
 
-ENV JAVA_HOME /etc/alternatives/jre
+# Download and install spark
+RUN curl https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz > /opt/spark-$SPARK_VERSION-bin-without-hadoop.tgz && \
+    mkdir ${SPARK_HOME} && \
+    tar xvfp ${SPARK_HOME}-${SPARK_VERSION}-bin-without-hadoop.tgz -C ${SPARK_HOME} --strip-components=1 && \
+    rm /opt/spark-$SPARK_VERSION-bin-without-hadoop.tgz
 
-ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini-amd64 /usr/bin/tini
-RUN chmod +x /usr/bin/tini
 
-RUN curl https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz > /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
-    mkdir /opt/spark && \
-    tar xvfp /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz -C /opt/spark --strip-components=1 && \
-    rm /opt/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
-    mkdir /opt/spark/work-dir
-
-WORKDIR /opt/spark/work-dir
-
-ENV SPARK_HOME /opt/spark
-
-RUN yum -y install epel-release && \
-    yum -y install python-pip && \
-    yum install -y centos-release-scl-rh && \
-    yum-config-manager --enable centos-sclo-rh-testing && \
-    INSTALL_PKGS="rh-python${PYTHON_VERSION} rh-python${PYTHON_VERSION}-python-pip" && \
-    yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus $INSTALL_PKGS && \
-    rpm -V $INSTALL_PKGS && \
-    yum clean all -y && rm -rf /var/cache/yum
-
-# Permanently enable python Software Collection
-# vars taken from : source scl_source enable rh-python36
-ENV PATH=$SPARK_HOME:/opt/rh/rh-python${PYTHON_VERSION}/root/usr/bin${PATH:+:${PATH}}
-ENV LD_LIBRARY_PATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-ENV MANPATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/share/man:$MANPATH
-ENV PKG_CONFIG_PATH=/opt/rh/rh-python${PYTHON_VERSION}/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
-ENV XDG_DATA_DIRS="/opt/rh/rh-python${PYTHON_VERSION}/root/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+# sbins dir of spark and hadoop isn't include in PATH because thereis conflict on excutables names
+ENV PATH=${SPARK_HOME}/bin:${PATH} \
+    PATH=${HADOOP_HOME}/bin:${PATH}
 
 # Configure pyspark
 ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
@@ -61,18 +38,24 @@ ENV JUPYTER_DATA_DIR=/usr/local/share/jupyter
 RUN yum install -y --setopt=tsflags=nodocs blas atlas gcc-gfortran swig gcc-c++ mercurial && \
     yum clean all && rm -rf /var/cache/yum
 
+# Install python libraries
 COPY requirements.txt /opt/spark/
 
 # RUN # pip install --no-cache-dir pipenv && \
-RUN  pip install --no-cache-dir -r /opt/spark/requirements.txt && \
+RUN  pip install --no-cache-dir -r ${SPARK_HOME}/requirements.txt && \
      jupyter toree install --spark_home=${SPARK_HOME} --interpreters=Scala,PySpark,SQL
 
 # As suggested for BigDL tutorials
 # https://github.com/intel-analytics/BigDL/blob/master/docker/BigDL/Dockerfile
 RUN python3 -m ipykernel install
 
+RUN mkdir /work-dir
+WORKDIR /work-dir
+
+VOLUME /work-dir/data
+
 EXPOSE 8888
 
 # https://jupyter-notebook.readthedocs.io/en/latest/public_server.html#docker-cmd
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0"]
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=127.0.0.1"]
