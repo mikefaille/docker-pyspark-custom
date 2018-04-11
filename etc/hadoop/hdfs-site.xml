@@ -1,0 +1,12 @@
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>dfs.name.dir</name>
+        <value>/work-dir/hadoop/dfs.name</value>
+    </property>
+
+HADOOP_OPTS="-Ddfs.name.dir=$NAMENODE_DATA -Ddfs.data.dir=$DFS_DATA"
+</configuration>

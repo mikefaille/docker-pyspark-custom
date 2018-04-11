@@ -15,7 +15,7 @@ datasets=(
 
 
 for i in "${datasets[@]}"; do
-    curl -L -o "data/$(basename ${i})" -C - "${i}"
+    curl -L -o "dataset/$(basename ${i})" -C - "${i}"
 done
 
 exit 0

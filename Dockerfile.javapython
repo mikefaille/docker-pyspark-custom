@@ -17,7 +17,8 @@ RUN set -ex && \
     yum clean all && rm -rf /var/cache/yum \
     echo "securerandom.source=file:/dev/urandom" >> /usr/lib/jvm/java/jre/lib/security/java.security
 
-ENV JAVA_HOME /etc/alternatives/jre
+RUN echo -e "\nJAVA_HOME=/etc/alternatives/jre" >> /etc/environment
+# ENV JAVA_HOME /etc/alternatives/jre
 
 # https://github.com/docker-library/official-images#init
 ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini-amd64 /usr/bin/tini
