@@ -16,7 +16,7 @@ host *
      StrictHostKeyChecking no
      UserKnownHostsFile=/dev/null
 EOF
-Pchmod 600 ~/.ssh/config
+chmod 600 ~/.ssh/config
 
 /usr/sbin/sshd -e &
 
