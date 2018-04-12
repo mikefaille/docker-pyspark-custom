@@ -2,7 +2,7 @@
     "variables": {
 	"source_ami_id": "ami-af4333cf",
 	"aws_region": "us-west-1",
-	"dest_ami_name": "CentOS-7.2-HVM-Patched-{{timestamp}}"
+	"dest_ami_name": "FastDS-Fedora-27-HVM-Patched-{{timestamp}}"
     },
 
     "builders": [{
