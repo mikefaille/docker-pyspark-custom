@@ -6,7 +6,7 @@ services:
      # build: .
      volumes:
        - ./data:/work-dir/data
-     restart: no
+     restart: "no"
      ports:
        - 8888:8888
      environment:
