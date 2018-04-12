@@ -1,0 +1,53 @@
+{
+    "variables": {
+	"source_ami_id": "ami-af4333cf",
+	"aws_region": "us-west-1",
+	"dest_ami_name": "CentOS-7.2-HVM-Patched-{{timestamp}}"
+    },
+
+    "builders": [{
+	"type": "amazon-ebs",
+	"region": "{{user `aws_region`}}",
+	"source_ami": "{{user `source_ami_id`}}",
+	"instance_type": "t2.micro",
+
+	"ami_block_device_mappings": [
+            {
+		"device_name": "/dev/sda1",
+		"volume_type": "gp2",
+		"delete_on_termination": true
+            }
+	],
+	"ssh_username": "fedora",
+	"ssh_pty": true,
+	"ami_name": "{{user `dest_ami_name`}}",
+	"ami_description": "CentOS 7 HVM AMI based on the official Marketplace image with latest patches applied"
+    }],
+
+    "provisioners": [{
+	"type": "shell",
+	"inline": [
+	    "sudo cp /etc/sysconfig/selinux /etc/sysconfig/selinux.bak",
+	    "sudo cat /etc/sysconfig/selinux.bak | sudo sed 's/SELINUX=enforcing/SELINUX=disabled/g' | sudo tee  /etc/sysconfig/selinux",
+	    "sudo dnf -y upgrade",
+	    "sudo dnf -y install java-1.8.0-openjdk-devel git vim nano openssh-clients python3 wget curl xz",
+	    "sudo dnf -y install redhat-rpm-config python3-devel python2-devel python2 python3 mercurial swig gcc blas atlas gcc-gfortran swig gcc-c++",
+	    "sudo dnf -y install dnf-plugins-core",
+	    "sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo",
+	    "sudo dnf -y install docker-ce",
+	    "sudo systemctl enable docker",
+	    "mkdir src && cd src && git clone https://github.com/agileops/fastds-tutorial.git",
+	    "cd fastds-tutorial",
+	    "sudo pip3 install --no-cache-dir -r requirements.txt docker-compose",
+	    "sudo python3 -m ipykernel install",
+	    "./prepare.sh",
+	    "sudo wget https://gist.githubusercontent.com/mikefaille/89b3a83b9088683632512f7f203f2186/raw/86ec7889fdeedf0e8e680c084fee48d5b504c0ea/gistfile1.txt -O /etc/systemd/system/fastds.service",
+	    "sudo systemctl daemon-reload && sudo systemctl enable fastds",
+	    "sudo dnf clean all",
+	    "sudo usermod -a -G wheel fedora",
+	    "sudo usermod -a -G docker fedora",
+	    "echo Defaults secure_path = '/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin' | sudo tee /etc/sudoers.d/securepath_local"
+
+	]
+    }]
+}
