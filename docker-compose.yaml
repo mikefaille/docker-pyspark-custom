@@ -1,0 +1,13 @@
+version: '3.3'
+
+services:
+   db:
+     image: agileops/fastds-tutorial:latest
+     # build: .
+     volumes:
+       - ./data:/work-dir/data
+     restart: unless-stopped
+     ports:
+       - 8888:8888
+     environment:
+       BIND_ADDRESS: 0.0.0.0

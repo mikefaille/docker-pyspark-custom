@@ -5,7 +5,8 @@ ENV HADOOP_VERSION=2.7.5 \
     SPARK_VERSION=2.3.0 \
     SPARK_HOME=/opt/spark \
     PYTHON_VERSION=36 \
-    PYSPARK_PYTHON=python${PYTHON_VERSION}
+    PYSPARK_PYTHON=python${PYTHON_VERSION} \
+    BIND_ADDRESS="127.0.0.1"
 
 # Download and install hadoop+yarn+hdfs
 RUN yum install -y which && \
@@ -88,4 +89,5 @@ EXPOSE 8888
 
 # https://jupyter-notebook.readthedocs.io/en/latest/public_server.html#docker-cmd
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=127.0.0.1"]
+
+CMD jupyter notebook --port=8888 --no-browser --ip=${BIND_ADDRESS}
