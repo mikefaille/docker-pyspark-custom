@@ -33,7 +33,9 @@ RUN curl https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK
 ENV PATH=${SPARK_HOME}/bin:${PATH} \
     PATH=${HADOOP_HOME}/bin:${PATH}
 
-RUN export SPARK_DIST_CLASSPATH=$(hadoop classpath) >> ${SPARK_HOME}/conf/spark-env.sh && chmod +x ${SPARK_HOME}/conf/spark-env.sh
+# https://spark.apache.org/docs/latest/hadoop-provided.html
+RUN echo 'export SPARK_DIST_CLASSPATH=$(hadoop classpath)' >> ${SPARK_HOME}/conf/spark-env.sh && chmod +x ${SPARK_HOME}/conf/spark-env.sh
+
 
 # Configure pyspark
 ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
